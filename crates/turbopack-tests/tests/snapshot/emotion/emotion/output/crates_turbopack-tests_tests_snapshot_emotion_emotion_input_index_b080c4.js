@@ -1176,6 +1176,10 @@ function disposeChunkList(chunkListPath) {
     }
   }
 
+  // We must also dispose of the chunk list's chunk itself to ensure it may
+  // be reloaded properly in the future.
+  BACKEND.unloadChunk(chunkListPath);
+
   return true;
 }
 
@@ -1261,7 +1265,7 @@ function registerChunkList(chunkList) {
     }
   }
 
-  if (chunkList.isRuntime) {
+  if (chunkList.source === "entry") {
     markChunkListAsRuntime(chunkList.path);
   }
 }
