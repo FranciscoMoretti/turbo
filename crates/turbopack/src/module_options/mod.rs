@@ -17,7 +17,7 @@ use turbopack_css::{CssInputTransform, CssInputTransformsVc};
 use turbopack_ecmascript::{
     EcmascriptInputTransform, EcmascriptInputTransformsVc, EcmascriptOptions,
 };
-use turbopack_mdx::MdxTransformOptions;
+use turbopack_mdx::{MdxTransformOptions, MdxTransformOptionsVc};
 use turbopack_node::transforms::{postcss::PostCssTransformVc, webpack::WebpackLoadersVc};
 
 use crate::evaluate_context::node_evaluate_asset_context;
@@ -340,21 +340,18 @@ impl ModuleOptionsVc {
         if enable_mdx || enable_mdx_rs {
             let (jsx_runtime, jsx_import_source) = if let Some(enable_jsx) = enable_jsx {
                 let jsx = enable_jsx.await?;
-                (
-                    OptionStringVc::cell(jsx.runtime.clone()),
-                    OptionStringVc::cell(jsx.import_source.clone()),
-                )
+                (jsx.runtime.clone(), jsx.import_source.clone())
             } else {
-                (OptionStringVc::cell(None), OptionStringVc::cell(None))
+                (None, None)
             };
 
-            let mdx_transform_options = MdxTransformOptions {
+            let mdx_transform_options = MdxTransformOptionsVc::cell(MdxTransformOptions {
                 development: true,
                 preserve_jsx: false,
                 jsx_runtime,
                 jsx_import_source,
                 filepath: Some(path),
-            };
+            });
 
             rules.push(ModuleRule::new(
                 ModuleRuleCondition::any(vec![
