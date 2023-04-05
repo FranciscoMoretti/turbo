@@ -1,6 +1,12 @@
 mod server_to_client_proxy;
 
-use std::{fmt::Debug, path::Path, sync::Arc};
+use std::{
+    collections::hash_map::DefaultHasher,
+    fmt::Debug,
+    hash::{Hash, Hasher},
+    path::Path,
+    sync::Arc,
+};
 
 use anyhow::Result;
 use swc_core::{
@@ -177,9 +183,15 @@ impl EcmascriptInputTransform {
             }
             EcmascriptInputTransform::Emotion => {
                 let p = std::mem::replace(program, Program::Module(Module::dummy()));
+                let hash = {
+                    let mut hasher = DefaultHasher::new();
+                    p.hash(&mut hasher);
+                    hasher.finish()
+                };
                 *program = p.fold_with(&mut swc_emotion::emotion(
                     Default::default(),
                     Path::new(file_name_str),
+                    hash as u32,
                     source_map.clone(),
                     comments.clone(),
                 ))
